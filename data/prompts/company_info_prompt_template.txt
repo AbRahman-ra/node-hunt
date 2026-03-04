@@ -1,0 +1,4 @@
+- who does this email belong to? {{EMAIL}}
+- can you tell me what are the emails associated with {{COMPANY}} recruiters/hr/cto/generic emails if exist? (like careers@..., info@..., hr@..., jobs@..., hello@..., etc...) kindly list these emails and any other emails observed in {{COMPANY}} job postings in this schema: array({name: "<FIRST_NAME_IF_EXIST>", "value": email, "notes": "OBTAINED_FROM_RESEARCH, <YOUR_NOTES>"}). Note that the "name" key is optional
+- Can you map the domains of {{COMPANY}} to one of these categories: ecommerce, fintech, fnb // food and bevarages, swh // software house, edtech, entertainment, outsourcing, telecom, marketing, other
+Kindly answer only with this json based on your research resukts: {domain: "<CATEGORIES>", emails: <ARRAY_OF_EMAIL_SCHEMAS>, notes?: "<OTHER_OPTIONAL_NOTES_YOU_WANT_TO_INCLUDE>"}, do not include any additional text

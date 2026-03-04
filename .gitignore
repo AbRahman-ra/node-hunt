@@ -1,0 +1,12 @@
+.env
+node_modules/
+data/prompts/*
+!data/prompts/*template*
+!data/prompts/*example*
+data/*.*
+!data/*example*
+tmp/
+assets/*.pdf
+.vscode/
+tsconfig.json
+index.ts

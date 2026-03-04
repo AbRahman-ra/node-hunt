@@ -1,0 +1,37 @@
+{
+    "offset": 0,
+    "candidates": [
+        {
+            "cr": "00000-0",
+            "domain": "unset",
+            "status": "initiated",
+            "name": "Example Company LTD",
+            "name_ar": "نموذج شركة",
+            "email": [
+                {
+                    "value": "example@example.com",
+                    "notes": "EXAMPLE EMAIL"
+                },
+                {
+                    "name": "John",
+                    "value": "johndoe@example.com",
+                    "notes": "EXAMPLE EMAIL WITH NAMED PERSON"
+                }
+            ],
+            "logs": [
+                {
+                    "timestamp": "2025-06-24 19:08:20",
+                    "update": "INFO"
+                }
+            ],
+            "website": [
+                {
+                    "value": "www.example.com",
+                    "notes": "OBTAINED FROM SIJILAT"
+                }
+            ],
+            "alias": "Example Company",
+            "notes": "Some About Information"
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+[
+    {
+        "domain": "unset",
+        "email": [
+            {
+                "value": "another.example@example.com",
+                "notes": "OBTAINED_FROM_AI_RESPONSE"
+            }
+        ],
+        "notes": "AI Info"
+    }
+]
