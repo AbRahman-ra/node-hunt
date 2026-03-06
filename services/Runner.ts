@@ -1,6 +1,6 @@
 import { newAccessToken } from "../services/SijilatAuth";
 import { toCRData } from "../mapper/CompleteCRDetailsMapper";
-import { getCRDetails } from "../services/SijilatApi";
+import { getCRDetails, searchCR } from "../services/SijilatApi";
 import { CompleteCRDetailsRequest } from "../types/CompleteCRDetailsRequest";
 import { PATHS } from "../config/const";
 import {
@@ -8,12 +8,9 @@ import {
     getLeanDataFile,
     getRawDataFile,
 } from "../config/data";
-import {
-    CRLeanData,
-    CompanyDomain,
-    LeanCandidateCompany,
-    LeanCompanyStatus,
-} from "../types/CRLeanData";
+import { CRLeanData } from "../types/CRLeanData";
+import * as mapper from "./../mapper/CompleteCRDetailsMapper";
+import { SijilatCompany } from "../types/SijilatCompanies";
 
 export const getAndAppendData = async () => {
     // get data
@@ -46,6 +43,65 @@ export const getAndAppendData = async () => {
     );
 };
 
+export const newCompany = async (cr: number, branch: number) => {
+    // get data
+    let rawCompanies = await getRawDataFile();
+    let leanCompanies = await getLeanDataFile();
+
+    // if company exist, exit
+    let i = rawCompanies.findIndex(
+        (c) => c.CR_NO === `${cr}` && c.BRANCH_NO === `${branch}`,
+    );
+    let j = leanCompanies.candidates.findIndex(
+        (c) => c.cr === `${cr}-${branch}`,
+    );
+
+    if (i !== -1) {
+        console.log(
+            `Company With CR: ${cr}-${branch} is already stored at index ${i} in the raw data file`,
+        );
+        j === -1
+            ? leanCompanies.candidates.push(
+                  mapper.toLeanCompany(rawCompanies[i]),
+              )
+            : console.log(
+                  `Company With CR: ${cr}-${branch} is already stored at index ${j} in the lean data file`,
+              );
+        return;
+    }
+
+    let accessToken = (await newAccessToken()).access_token;
+    let companyRawData = (await searchCR(cr, branch))?.jsonData.CR_list[0];
+
+    if (!companyRawData) {
+        console.error("Couldn't get general company response");
+        return;
+    }
+
+    let companyRawCRResponse = await getCRDetails(
+        { branch_no: branch, cr_no: cr, CULT_LANG: "EN" },
+        accessToken,
+    );
+
+    if (!companyRawCRResponse) {
+        console.error("Couldn't get specific company response");
+        return;
+    }
+
+    companyRawData.CR_DATA = mapper.toCRData(companyRawCRResponse);
+    rawCompanies.push(companyRawData);
+    leanCompanies.candidates.push(mapper.toLeanCompany(companyRawData));
+
+    await Bun.write(
+        PATHS.DATA.RAW_API_RESPONSE,
+        JSON.stringify(rawCompanies, null, 4),
+    );
+    await Bun.write(
+        PATHS.DATA.LEAN_DATA,
+        JSON.stringify(leanCompanies, null, 4),
+    );
+};
+
 export const createLeanData = async () => {
     let data: CRLeanData = { offset: 0, candidates: [] };
     let companies = await getRawDataFile();
@@ -53,39 +109,7 @@ export const createLeanData = async () => {
         len = companies.length;
 
     for (let c of companies) {
-        let obtainedFromCommercialAddress =
-            "OBTAINED FROM SIJILAT `CR_DATA?.commercial_address.";
-        let emailSource = "CR_EMAIL`";
-        let urlSource = "CR_URL`";
-        let estoreSource = "ESTORE_URL`";
-        let leanData: LeanCandidateCompany = {
-            cr: `${c.CR_NO}-${c.BRANCH_NO}`,
-            domain: CompanyDomain.unset,
-            status: LeanCompanyStatus.initiated,
-            name: c.CR_LNM,
-            name_ar: c.CR_ANM,
-            email: [
-                {
-                    value: c.CR_DATA?.commercial_address.CR_EMAIL,
-                    notes: obtainedFromCommercialAddress + emailSource,
-                },
-            ],
-            logs: [],
-            website: [
-                {
-                    value: c.CR_DATA?.commercial_address.CR_URL,
-                    notes: obtainedFromCommercialAddress + urlSource,
-                },
-            ],
-        };
-
-        if (c.CR_DATA?.commercial_address.ESTORE_URL?.length) {
-            leanData.website?.push({
-                value: c.CR_DATA?.commercial_address.ESTORE_URL,
-                notes: obtainedFromCommercialAddress + estoreSource,
-            });
-        }
-
+        let leanData = mapper.toLeanCompany(c);
         data.candidates.push(leanData);
         console.log(`finished ${i} / ${len}`);
         i++;

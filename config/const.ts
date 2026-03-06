@@ -2,6 +2,7 @@ export const ENDPOINTS = {
     TOKEN: "token",
     API: "api",
     COMPLETE_CR_DETAILS: "CRdetails/CompleteCRDetails",
+    SEARCH_CR: "CRdetails/AdvanceSearchCR_Paging",
 };
 
 export const PATHS = {

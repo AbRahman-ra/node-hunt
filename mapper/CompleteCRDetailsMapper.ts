@@ -1,5 +1,10 @@
+import {
+    CompanyDomain,
+    LeanCandidateCompany,
+    LeanCompanyStatus,
+} from "../types/CRLeanData";
 import { CompleteCRDetailsResponse } from "../types/CompleteCRDetailsResponse";
-import { CRData } from "../types/SijilatCompanies";
+import { CRData, SijilatCompany } from "../types/SijilatCompanies";
 
 export const toCRData = (data: CompleteCRDetailsResponse): CRData => {
     let json = data.jsonData;
@@ -22,4 +27,40 @@ export const toCRData = (data: CompleteCRDetailsResponse): CRData => {
     };
 
     return result;
+};
+
+export const toLeanCompany = (c: SijilatCompany): LeanCandidateCompany => {
+    let obtainedFromCommercialAddress =
+        "OBTAINED FROM SIJILAT `CR_DATA?.commercial_address.";
+    let emailSource = "CR_EMAIL`";
+    let urlSource = "CR_URL`";
+    let estoreSource = "ESTORE_URL`";
+    let leanData: LeanCandidateCompany = {
+        cr: `${c.CR_NO}-${c.BRANCH_NO}`,
+        domain: CompanyDomain.unset,
+        status: LeanCompanyStatus.initiated,
+        name: c.CR_LNM,
+        name_ar: c.CR_ANM,
+        email: [
+            {
+                value: c.CR_DATA?.commercial_address.CR_EMAIL,
+                notes: obtainedFromCommercialAddress + emailSource,
+            },
+        ],
+        logs: [],
+        website: [
+            {
+                value: c.CR_DATA?.commercial_address.CR_URL,
+                notes: obtainedFromCommercialAddress + urlSource,
+            },
+        ],
+    };
+
+    if (c.CR_DATA?.commercial_address.ESTORE_URL?.length) {
+        leanData.website?.push({
+            value: c.CR_DATA?.commercial_address.ESTORE_URL,
+            notes: obtainedFromCommercialAddress + estoreSource,
+        });
+    }
+    return leanData;
 };

@@ -9,7 +9,20 @@ import {
     CompanySummary,
     Director,
     ShareholderOrPartner,
+    SijilatCompany,
 } from "./SijilatCompanies";
+
+export interface SearchCRResponse {
+    Status_Code: string;
+    Status_Message: string;
+    jsonData: {
+        draw: number;
+        Total_Records: string;
+        CR_list: SijilatCompany[];
+    };
+    Code: string;
+    Message: string;
+}
 
 export interface CompleteCRDetailsResponse {
     Status_Code: string;
