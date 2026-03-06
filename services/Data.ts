@@ -79,3 +79,6 @@ export const mergeEmailValuesForCompany = (
     c1.email = Array.from(map.values());
     return c1;
 };
+
+export const companyAt = async (i: number) =>
+    (await getLeanDataFile()).candidates[i] ?? undefined;
