@@ -1,5 +1,6 @@
 import { PATHS } from "../config/const";
 import { getLeanDataFile } from "../config/data";
+import { randomInt } from "../helper/Math";
 import {
     CompanyDomain,
     LeanCandidateCompany,
@@ -8,7 +9,7 @@ import {
 import { EmailTemplateParams } from "../types/EmailTemplateParams";
 import { body, send } from "./Mailer";
 
-export const applyBatch = async (n: number = 50, delay: number = 60) => {
+export const applyBatch = async (n: number = 50) => {
     // load data
     const data = await getLeanDataFile();
     let start = data.offset;
@@ -17,18 +18,14 @@ export const applyBatch = async (n: number = 50, delay: number = 60) => {
     // loop over companies
     for (let i = start; i < end; i++, data.offset++) {
         const c = data.candidates[i];
-        apply(c, delay);
+        apply(c);
+        console.log(`State saved. Current offset: ${data.offset}`);
+        await Bun.write(PATHS.DATA.LEAN_DATA, JSON.stringify(data, null, 4));
     }
-
-    console.log(
-        `Changes completed, persisting file with new offset ${data.offset}...`,
-    );
-    await Bun.write(PATHS.DATA.LEAN_DATA, JSON.stringify(data, null, 4));
 };
 
 export const apply = async (
     company: LeanCandidateCompany,
-    delay: number = 60,
     checkStatus: boolean = true,
 ) => {
     if (
@@ -69,7 +66,8 @@ export const apply = async (
             if (company.logs) company.logs.push({ timestamp, update });
             else company.logs = [{ timestamp, update }];
 
-            Bun.sleepSync(delay * 1000); // delay between email sends to prevent being spam
+            let delay = randomInt(45, 120);
+            Bun.sleepSync(delay * 1000);
         } catch (error) {
             let update = `ERROR: ❌ Failed to send email ${error}`;
             let timestamp = new Date().toString();
