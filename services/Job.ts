@@ -52,8 +52,8 @@ export const apply = async (
 
         let dto = {
             body: html,
-            // to: `${e.value}`, // PRODUCTION
-            to: `${process.env.MAIL_DEV_TEST_ADDRESS}`, // DEVELOPMENT
+            to: `${e.value}`, // PRODUCTION
+            // to: `${process.env.MAIL_DEV_TEST_ADDRESS}`, // DEVELOPMENT
             subject: `Software Development Roles at ${company.name}`,
             attachments: [{ path: PATHS.ASSETS.RESUME }],
         };
