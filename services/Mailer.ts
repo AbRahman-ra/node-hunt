@@ -61,8 +61,6 @@ export const send = async (dto: EmailDto) => {
         if (dto.replyTo) options.replyTo = dto.replyTo;
 
         let info = await transporter.sendMail(options);
-        console.log(`✅ Success! Email sent to ${dto.to}`);
-        console.log(`🔗 Message ID: ${info.messageId}`);
         return info;
     } catch (error) {
         throw error;

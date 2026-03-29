@@ -16,10 +16,12 @@ export const applyBatch = async (n: number = 50) => {
     let end = Math.min(start + n, data.candidates.length);
 
     // loop over companies
-    for (let i = start; i < end; i++, data.offset++) {
+    for (let i = start; i < end; i++) {
         const c = data.candidates[i];
-        apply(c);
-        console.log(`State saved. Current offset: ${data.offset}`);
+        await apply(c);
+        console.log(
+            `Finished ${i} / ${end} companies. Current offset: ${++data.offset}`,
+        );
         await Bun.write(PATHS.DATA.LEAN_DATA, JSON.stringify(data, null, 4));
     }
 };
@@ -43,6 +45,7 @@ export const apply = async (
     };
 
     // loop over emails
+    let i = 1;
     for (let e of company.email) {
         param.recipient = { name: e.name ?? "Hiring Manager" };
         let html = await body(param);
@@ -57,7 +60,6 @@ export const apply = async (
 
         // send email
         try {
-            console.log(`sending email to: ${e.value}`);
             let info = await send(dto);
 
             let update = `INFO: Email Sent to ${e.value}, Message ID: ${info.messageId}`;
@@ -67,7 +69,11 @@ export const apply = async (
             else company.logs = [{ timestamp, update }];
 
             let delay = randomInt(45, 120);
-            Bun.sleepSync(delay * 1000);
+            console.log(
+                `sent ${i} / ${company.email.length} emails, sleeping ${delay} seconds...`,
+            );
+            i++;
+            await Bun.sleep(delay * 1000);
         } catch (error) {
             let update = `ERROR: ❌ Failed to send email ${error}`;
             let timestamp = new Date().toString();

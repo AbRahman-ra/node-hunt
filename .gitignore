@@ -6,6 +6,7 @@ data/prompts/*
 data/*.*
 !data/*example*
 tmp/
+logs/
 assets/*.pdf
 .vscode/
 tsconfig.json

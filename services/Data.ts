@@ -14,6 +14,17 @@ export const leanMap = async (cb: (c: LeanCandidateCompany) => void) => {
     await Bun.write(PATHS.DATA.LEAN_DATA, JSON.stringify(data, null, 4));
 };
 
+export const rangedLeanMap = async (cb: (c: LeanCandidateCompany) => void, start: number = 0, end?: number) => {
+    const data = await getLeanDataFile();
+    let s = !start || start < 0 ? 0 : start;
+    let e = !end || end > data.candidates.length ? data.candidates.length : end;
+    for (let i = s; i < e; i++) {
+        let c =  data.candidates[i];
+        cb(c);
+    }
+    await Bun.write(PATHS.DATA.LEAN_DATA, JSON.stringify(data, null, 4));
+};
+
 export const aiEmailResponsesMap = async (
     cb: (c: MinimalCompanyData) => void,
 ) => {
@@ -40,9 +51,12 @@ export const mergeEmailValues = async (
             companies.candidates[i],
             responses[i],
         );
+        await Bun.write(
+            PATHS.DATA.LEAN_DATA,
+            JSON.stringify(companies, null, 4),
+        );
+        console.log(`Done ${i} / ${end}`);
     }
-
-    await Bun.write(PATHS.DATA.LEAN_DATA, JSON.stringify(companies, null, 4));
 };
 
 export const mergeEmailValuesForCompany = (
